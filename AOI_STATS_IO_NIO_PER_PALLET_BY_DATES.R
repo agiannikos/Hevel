@@ -11,8 +11,8 @@ setwd("G:/RDEV")
 ##--Dates--------------------------------------------------
 #--Define the dates for the statistics.-------------------# 
 #--Date format: mm.dd.yyyy (month.day.year)---------------#
-from_date <- "03.03.2015"
-to_date  <- "03.04.2015"
+from_date <- "03.01.2015"
+to_date  <- "03.13.2015"
 
 #--Define AOI Tool: Values: 01-AOI-001 OR 01-AOI-002-------
 aoiTool <- "01-AOI-001"

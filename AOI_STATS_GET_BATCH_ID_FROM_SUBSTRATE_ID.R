@@ -4,10 +4,10 @@
 #---Working directory is the directory that this file is -#   
 #---located. Under the same directory the script----------#
 #---AOI_FUNCTIONS.R have to be placed---------------------#
-setwd("G:/RDEV")
+setwd("E:/RDEV")
 
 ##--Substrate ID------------------------------------------
-SubstrateID <-"HVL1P11503120614"
+SubstrateID <-"HVL1P11503030421"
 #----END OF INPUTS----------------------------------------#
 #---------------------------------------------------------#
 
