@@ -5,7 +5,7 @@
 #---Working directory is the directory that this file is -#   
 #---located. Under the same directory the script----------#
 #---AOI_FUNCTIONS.R have to be placed---------------------#
-setwd("G:/RDEV")
+setwd("E:/RDEV")
 
 
 ##--Dates--------------------------------------------------
