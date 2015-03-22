@@ -12,10 +12,16 @@ setwd("G:/RDEV")
 #--Define the dates for the statistics.-------------------# 
 #--Date format: mm.dd.yyyy (month.day.year)---------------#
 from_date <- "03.01.2015"
-to_date  <- "03.13.2015"
+to_date  <- "03.19.2015"
 
 #--Define AOI Tool: Values: 01-AOI-001 OR 01-AOI-002-------
-aoiTool <- "01-AOI-001"
+aoiTool <- "01-AOI-002"
+
+#--Excel File Name-----------------------------------------
+#--if the file already exist it will be replaced.---------#
+#--The excel file will be saved in output folder which is-#
+#--located in the working directory-----------------------#
+excelName  <- "AOI_0021.xlsx"
 
 #----END OF INPUTS----------------------------------------#
 #---------------------------------------------------------#
@@ -24,7 +30,7 @@ aoiTool <- "01-AOI-001"
 ##----Libraries--------------------------------------------
 library(ggplot2)
 library(dplyr)
-#library(xlsx)
+library(xlsx)
 
 ##----Sources for Functions--------------------------------
 source("./AOI_FUNCTIONS.R")
@@ -36,7 +42,9 @@ source("./AOI_STATS_PIR_FILE_AND_FOLDER.R")
 pirData  <- read.csv(paste(pirDir,pirFile, sep=""))
 
 #--Extract Data from PIR FILE-----------------------------#
-plotData <- glassesPerDates(pirData=pirData, tool = aoiTool, fromDate= from_date, toDate = to_date)
+plotData <- glassesPerDatesPerTool(pirData=pirData, tool = aoiTool, fromDate= from_date, toDate = to_date)
+
+dataforbothtools <- glassesPerDates(pirData=pirData, fromDate= from_date, toDate = to_date)
 
 ##--Grouped & Summarised Data------------------------------
 #--Number of IO/NIO glasses per pallet for the given period
@@ -45,7 +53,7 @@ by_batch_status_count <- plotData %>%
         summarise(COUNT=n()) %>%
         arrange(DATE,GLS_BATCH_NR)
 
-View(by_batch_status_count)
+# View(by_batch_status_count)
 
 #--Glasses per pallet passed through AOI------------------#
 glasses_to_AOI_per_batch <- by_batch_status_count %>% 
@@ -53,7 +61,7 @@ glasses_to_AOI_per_batch <- by_batch_status_count %>%
         summarise(GLASSES_TO_AOI=sum(COUNT)) %>%
         arrange(DATE,GLS_BATCH_NR)
 
-View(glasses_to_AOI_per_batch)
+# View(glasses_to_AOI_per_batch)
 
 #--Total & Average defects per batch(pallet)--------------#
 by_batch_status_sum <- plotData %>%
@@ -61,7 +69,19 @@ by_batch_status_sum <- plotData %>%
         summarise(TOTAL_DEFECTS=sum(AOI_DEFECTS_TOTAL),AVG_DEFECTS=TOTAL_DEFECTS/n()) %>%
         arrange(DATE,GLS_BATCH_NR)
 
-View(by_batch_status_sum)
+# View(by_batch_status_sum)
+
+#--Write Excel Files---------------------------------------
+
+
+write.xlsx2(data.frame(by_batch_status_count), file = paste("./output/",excelName,sep=""),
+            sheetName = "Summarized Data",row.names = FALSE)
+
+write.xlsx2(plotData, file = paste("./output/",excelName,sep=""), 
+            sheetName = "Raw Data", append = TRUE)
+
+write.xlsx2(dataforbothtools, file = paste("./output/",excelName,sep=""), 
+            sheetName = "Both Tools", append = TRUE)
 
 
 ##--Plot Data----------------------------------------------

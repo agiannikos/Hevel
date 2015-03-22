@@ -8,15 +8,7 @@ rm(list=ls())
 setwd("G:/RDEV")
 
 ##--Pallet Number------------------------------------------
-palletNo <- "140819301665"
-
-#--Excel File Name-----------------------------------------
-#--if the file already exist it will be replaced.---------#
-#--The excel file will be saved in output folder which is-#
-#--located in the working directory-----------------------#
-#--if you define it as pallet.xlsx then the file will be--#
-#--saved with pellet ID like "140819301665.xlsx"----------#
-excelName  <- "pallet.xlsx"
+palletNo <- "/40509517765"
 
 #--AOI Directory for zip files-----------------------------
 #--The Main folder that are stored AOI Data---------------#  
@@ -46,6 +38,14 @@ source("./AOI_STATS_PIR_FILE_AND_FOLDER.R")
 ##-------Calculations--------------------------------------
 #--Read Data from the defined file------------------------#
 
+#--Excel File Name-----------------------------------------
+#--if the file already exist it will be replaced.---------#
+#--The excel file will be saved in output folder which is-#
+#--located in the working directory-----------------------#
+#--if you define it as pallet.xlsx then the file will be--#
+#--saved with pellet ID like "140819301665.xlsx"----------#
+excelName <- paste(palletNo,".xlsx",sep="")
+
 pirData  <- read.csv(paste(pirDir,pirFile, sep=""))
 
 #--Extract Data from PIR FILE-----------------------------#
@@ -53,12 +53,12 @@ substratesList <- glassesPerPallet(pirData=pirData,palletNo=palletNo)
 
 
 
-file_list <- getFileList(mainDirectory = aoidataMainDir ,subDirArray = aoiDataSubDir )
+file_list <- getFileList(mainDirectory = aoidataMainDir ,subDirArray = aoiDataSubDir)
 
 defectsPerPalletPerGlass <- getSubstratesDataFromZip(file_list =file_list,
                                                      pirSubstateListPerPallet = substratesList 
                                                      ) %>%
-        select(BATCH_ID,SUBSTRATE_ID,Defect.Class:X,-Images.Reflection)
+        select(BATCH_ID,SUBSTRATE_ID,Defect.Class:AOI_RESULT,-Images.Reflection)
 
 write.xlsx(defectsPerPalletPerGlass, file = paste("./output/",excelName,sep=""),
            sheetName = "Raw Data",row.names = FALSE
