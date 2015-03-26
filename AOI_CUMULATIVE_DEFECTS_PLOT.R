@@ -3,9 +3,9 @@ library(ggplot2)
 
 
 #-----Set working directory
-setwd("W:/????????????????????/7_AOI/AOI_1/02_2015")
+setwd("E:/Temp/03_2015")
 #-----Read data
-date_for_plot <- "2015_02_09"
+date_for_plot <- "2015_03_03"
 
 
 file_list <- list.files(pattern=paste("_",date_for_plot,"_",sep=""))

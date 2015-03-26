@@ -13,17 +13,6 @@ setwd("G:/RDEV")
 #--Define AOI Tool. Values: 01-AOI-001 OR 01-AOI-002-------
 aoiTool <- "01-AOI-002"
 
-##--Dates--------------------------------------------------
-#--Define the dates for the statistics.-------------------#
-#--Date format: mm.dd.yyyy (month.day.year)---------------#
-fromDate <- "03.01.2015"
-toDate  <- "03.05.2015"
-
-#--Access Database Name------------------------------------
-#--The Database should be placed at the folder:-----------#
-#--[folder of this script]/output/------------------------#
-accessName  <- "AOI_DATA.accdb"
-
 #--AOI Directory for zip files-----------------------------
 #--The Main folder that are stored AOI Data---------------#  
 aoidataMainDir <- "W:/????????????????????/7_AOI/AOI_2/"
@@ -33,7 +22,19 @@ aoidataMainDir <- "W:/????????????????????/7_AOI/AOI_2/"
 #--folders. The format is the following. c("03_2015")-----#
 #--for one folder or c("03_2015","04_2015","05_2015")-----#
 #--for two or more.---------------------------------------#
-aoiDataSubDir  <- c("03_2015")
+aoiDataSubDir  <- c("02_2015","03_2015")
+
+##--Dates--------------------------------------------------
+#--Define the dates for the statistics.-------------------#
+#--Date format: mm.dd.yyyy (month.day.year)---------------#
+fromDate <- "03.09.2015"
+toDate  <- "03.15.2015"
+
+#--Access Database Name------------------------------------
+#--The Database should be placed at the folder:-----------#
+#--[folder of this script]/output/------------------------#
+accessName  <- "AOI_DATA.accdb"
+
 
 #--END OF INPUTS------------------------------------------#
 #---------------------------------------------------------#
@@ -68,7 +69,7 @@ defectsPerGlass <- getSubstratesDataFromZip(file_list =file_list,
 
 #--Delete variables that are not needed in order----------#
 #--to release memory--------------------------------------#
-rm(list=setdiff(ls(),c("defectsPerGlass","missingSubstrates","accessName","deleteDuplicatesFromTable")))
+rm(list=setdiff(ls(),c("defectsPerGlass","missingSubstrates","accessName","deleteDuplicatesFromTableManyRecords")))
 gc()
 #--Store Data to the database------------------------------
 
@@ -77,9 +78,9 @@ mycon <- odbcConnectAccess2007(paste("./output/",accessName,sep=""))
 sqlSave(channel = mycon, dat = defectsPerGlass, tablename = "RowData", append = TRUE, rownames = FALSE,  colnames = FALSE, addPK = TRUE)
 sqlSave(channel = mycon, dat = missingSubstrates, tablename = "missingSubstrates", append = TRUE, rownames = FALSE,  colnames = FALSE, addPK = FALSE)
 
-rowDataColsArray <- c("BATCH_ID", "SUBSTRATE_ID", "DefectClass", "Layer", "Quality", "XPosition", "YPosition", "Width",
-                      "Length", "Size", "ID", "X", "DATE", "AOI_RESULT", "AOI_TOOL", "YEAR", "MONTH")
-
-# deleteDuplicatesFromTable(odbcConnection = mycon, tableName = "RowData",tableColsArray = rowDataColsArray)
+#--Delete Duplicates from tables if the same data have----#
+#--been imported twice------------------------------------#
+deleteDuplicatesFromTableManyRecords(odbcConnection = mycon, tableName = "RowData")
+deleteDuplicatesFromTableManyRecords(odbcConnection = mycon, tableName = "missingSubstrates")
 
 close(mycon)
