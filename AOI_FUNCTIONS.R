@@ -312,7 +312,7 @@ getGlassesFromMultiplePallets_split_by_dates <- function(pirData,fromDate,toDate
 #--The following function counts the number of glasses----#
 #--that have passed from the defined aoi at the defined---#
 #--time period--------------------------------------------#
-totalGlasses_by_dates_by_tool <- function(pirData,fromDate,toDate,aoiTool){
+totalGlasses_by_dates_by_tool <- function(pirData,fromDate, toDate, aoiTool){
         totalGlasses <- pirData %>%
                 filter(as.Date(AOI_TIME_END,"%m.%d.%Y %H:%M:%S")>=as.Date(fromDate,"%m.%d.%Y"),
                        as.Date(AOI_TIME_END,"%m.%d.%Y %H:%M:%S")<=as.Date(toDate,"%m.%d.%Y"),

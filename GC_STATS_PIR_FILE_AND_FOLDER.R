@@ -2,5 +2,5 @@
 #--Pir File Name------------------------------------------#
 pirFile <- "pir_report_150323_ALL_from_150305.csv"
 #--PIR Directory------------------------------------------#
-pirDir <- "E:/Temp/"
+pirDir <- "G:/Temp/"
 

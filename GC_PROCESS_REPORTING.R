@@ -8,7 +8,7 @@ rm(list=ls())
 #---Working directory is the directory that this file is -#
 #---located. Under the same directory the script----------#
 #---AOI_FUNCTIONS.R have to be placed---------------------#
-setwd("E:/RDEV")
+setwd("G:/RDEV")
 
 ##--Dates--------------------------------------------------
 #--Define the dates for the statistics.-------------------#

@@ -1,0 +1,5 @@
+install.packages("dplyr",dependencies = TRUE)
+install.packages("ggplot2",dependencies = TRUE)
+install.packages("gridExtra",dependencies = TRUE)
+install.packages("ReporteRs",dependencies = TRUE)
+install.packages("lazyeval",dependencies = TRUE)
