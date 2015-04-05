@@ -17,15 +17,18 @@ plotBoxPlot_with_density <- function(plotData, X_Variable, Y_Variable, yAxisLabe
         axis_ticks_label_size <- 10
         axis_ticks_label_angle <- 45
         plot_line_width <- 0.2
-        plot_line_width_multi <- 2
+        plot_line_width_multi <- 2.5
+        
+        plotData <- plotData %>% na.omit
         
         if (is.null(opt_y_axisMax)){
-                opt_y_axisMax=ceiling(max(plotData[,Y_Variable],opt_HLA,opt_HHLA))
+                opt_y_axisMax=ceiling(max(plotData[!is.na(Y_Variable),Y_Variable],opt_HLA,opt_HHLA))
         }
         
         if (is.null(opt_y_axisMin)){
                 opt_y_axisMin=floor(min(plotData[,Y_Variable],opt_LLA,opt_LLLA))
         }
+        
         
         gcPlot <- ggplot(data = plotData, aes_string(x = X_Variable, y=Y_Variable))
         
@@ -213,6 +216,8 @@ getSubstratesBalanceForGivenPalletIDS <- function(pirData, palletIDs_df){
 }
 
 
+
+#Scatter plot with marginal density plots
 getAOICumulativePlotsWithDensityPlots <- function(pirData, aoiTool, fromDate, toDate, aoiFilesList){
         
         opt_densityPlotLabel="Density"
@@ -222,9 +227,9 @@ getAOICumulativePlotsWithDensityPlots <- function(pirData, aoiTool, fromDate, to
         plot_line_width <- 0.2
         plot_line_width_multi <- 2
         opt_y_axisMin <- 0
-        opt_y_axisMin <- 1300
+        opt_y_axisMax <- 1300
         opt_x_axisMin <- 0
-        opt_x_axisMin <- 1100
+        opt_x_axisMax <- 1100
         
         
         listOfSubstratesFromPir <- getGlassesFromMultiplePallets_by_dates(pirData = pirData, 
@@ -236,27 +241,60 @@ getAOICumulativePlotsWithDensityPlots <- function(pirData, aoiTool, fromDate, to
         defectsPerGlass <- getSubstratesDataFromZip(file_list =aoiFilesList,
                                                     pirSubstateListPerPallet = listOfSubstratesFromPir 
         ) %>%
-                select(BATCH_ID,SUBSTRATE_ID,Defect.Class:MONTH,-Images.Reflection)
+                select(BATCH_ID,SUBSTRATE_ID,Defect.Class:MONTH,-Images.Reflection) %>%
+                filter(!is.na(X.Position))
+        
+        dat<<-defectsPerGlass
         
         #-----Plot data with ggplot2
-        p<-ggplot(data=defectsPerGlass, aes(x=X.Position, y=Y.Position, colour=Defect.Class, alpha=1/50, shape=Layer))
-        
-        p <- p+layer(geom="point")
-        p <- p+xlab("X")+ylab("Y")
-        p <- p + coord_fixed(ratio=1)
-        p <- p + xlim(1100,0)+ylim(1300,0)
+        splot <- ggplot(data=defectsPerGlass, aes(x=X.Position, y=Y.Position, colour=Defect.Class, alpha=1/50, shape=Layer))
+        splot <- splot + layer(geom="point")
+        splot <- splot + xlab("X")+ylab("Y")
+        splot <- splot + coord_fixed(ratio=1)
+        splot <- splot + xlim(1100,0)+ylim(1300,0)
+        splot <- splot + theme(legend.position = "none")
         #p <- p + ggtitle(paste("Data: ",getwd(), " - Glasses: ", length(file_list)," - Date:",date_for_plot)) + theme(plot.title=element_text(size=12))
         
-        dplot <- ggplot(data = defectsPerGlass, aes(x = X.Position))
-        dplot <- dplot + geom_density(colour = "black", fill= "grey",lwd=plot_line_width) 
-#         dplot <- dplot + scale_x_continuous(expand=c(0.02,0), labels=NULL, limits = c(opt_y_axisMin,opt_y_axisMax)) + scale_y_continuous(expand=c(0.02,0))
-#         dplot <- dplot + xlab(NULL) + ylab(opt_densityPlotLabel)  
-#         dplot <- dplot + theme(axis.title=element_text(size=axis_label_font_size,face="bold"), 
-#                                                axis.text.x = element_text(angle = axis_ticks_label_angle, hjust = 1, size=axis_ticks_label_size),
-#                                                axis.ticks.y=element_blank(),
-#                                                plot.margin=unit(c(1,1,1,-0.15), "cm"))
-                                               
-        return(dplot)
+        #         g_legend<-function(a.gplot){
+        #                 tmp <- ggplot_gtable(ggplot_build(a.gplot))
+        #                 leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+        #                 legend <- tmp$grobs[[leg]]
+        #                 return(legend)
+        #         }
+        #         
+        #         legend <- g_legend(splot)
         
+        tdplot <- ggplot(data = defectsPerGlass, aes(x = X.Position))
+        tdplot <- tdplot + geom_density(fill= "grey", colour = "dark grey", lwd=plot_line_width) 
+        tdplot <- tdplot + 
+                scale_x_continuous(expand=c(0.02,0), labels=NULL, limits = c(opt_x_axisMin,opt_x_axisMax)) + 
+                scale_y_continuous(expand=c(0.02,0),labels=NULL)
+        tdplot <- tdplot + xlab(NULL) + ylab(opt_densityPlotLabel)
+        tdplot <- tdplot + theme(plot.margin=unit(c(1,1,1,1),"cm"))
         
+        #         tdplot <- tdplot + theme(axis.title=element_text(size=axis_label_font_size,face="bold"), 
+        #                                                axis.text.x = element_text(angle = axis_ticks_label_angle, hjust = 1, size=axis_ticks_label_size),
+        #                                                axis.ticks.y=element_blank(),
+        #                                                plot.margin=unit(c(1,1,1,-0.15), "cm"))
+        
+        rdplot <- ggplot(data = defectsPerGlass, aes(x = Y.Position))
+        rdplot <- rdplot + geom_density(fill= "grey", colour = "dark grey", lwd=plot_line_width) 
+        rdplot <- rdplot + 
+                scale_x_continuous(expand=c(0.02,0), labels=NULL, limits = c(opt_y_axisMin,opt_y_axisMax)) + 
+                scale_y_continuous(expand=c(0.02,0),labels=NULL)
+        rdplot <- rdplot + xlab(NULL) + ylab(opt_densityPlotLabel)
+        rdplot <- rdplot + theme(plot.margin=unit(c(1,1,1,1), "cm")) + coord_flip()
+        
+        splot <- ggplotGrob(splot)
+        tdplot <- ggplotGrob(tdplot)
+        rdplot <- ggplotGrob(rdplot)
+        
+        maxGridWidths  <-  grid::unit.pmax(splot$widths[2:5],tdplot$widths[2:5])
+        
+        splot$widths[2:5] <- as.list(maxGridWidths)
+        tdplot$widths[2:5] <- as.list(maxGridWidths)        
+        
+        plot <- arrangeGrob(tdplot,  splot, ncol=1, widths=c(3,1), heights=c(1,3))
+        
+        return(plot)
 }

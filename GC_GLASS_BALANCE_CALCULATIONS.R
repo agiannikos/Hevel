@@ -30,7 +30,13 @@ source("./GC_STATS_PIR_FILE_AND_FOLDER.R")
 
 ##-------Calculations--------------------------------------
 #--Read Data from the defined file------------------------#
-pirData  <- read.csv(paste(pirDir,pirFile, sep=""))
+pirData <- NULL
+for (pirF in pirFile){
+        pirTempData  <- read.csv(paste(pirDir,pirF, sep=""), colClasses=c("GLS_BATCH_NR"="character"))
+        pirData <- rbind(pirData,pirTempData)
+}
+
+pirData <- distinct(pirData)
 
 
 pallets <- getPalletsPerDates(pirData = pirData,fromDate = fromDate, toDate = toDate)

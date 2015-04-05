@@ -38,6 +38,14 @@ source("./AOI_STATS_PIR_FILE_AND_FOLDER.R")
 ##-------Calculations--------------------------------------
 #--Read Data from the defined file------------------------#
 
+pirData <- NULL
+for (pirF in pirFile){
+        pirTempData  <- read.csv(paste(pirDir,pirF, sep=""), colClasses=c("GLS_BATCH_NR"="character"))
+        pirData <- rbind(pirData,pirTempData)
+}
+
+pirData <- distinct(pirData)
+
 #--Excel File Name-----------------------------------------
 #--if the file already exist it will be replaced.---------#
 #--The excel file will be saved in output folder which is-#
@@ -46,7 +54,6 @@ source("./AOI_STATS_PIR_FILE_AND_FOLDER.R")
 #--saved with pellet ID like "140819301665.xlsx"----------#
 excelName <- paste(palletNo,".xlsx",sep="")
 
-pirData  <- read.csv(paste(pirDir,pirFile, sep=""))
 
 #--Extract Data from PIR FILE-----------------------------#
 substratesList <- glassesPerPallet(pirData=pirData,palletNo=palletNo) 

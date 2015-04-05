@@ -70,6 +70,61 @@ getSubstratesDataFromZip <- function(file_list, pirSubstateListPerPallet){
         substrateData <- NULL
         naData <- NULL
         
+        
+        #This function selects the required columns for various defects.tsv formats.
+        selectData <- function(data){
+                if(ncol(data)>11 & ncol(data)<=132){
+                        selectData <- data %>%
+                                mutate(Layer=NA) %>%
+                                select(Defect.Class,
+                                       Layer,
+                                       Quality,
+                                       X.Position=3, #"xpos.mm.",
+                                       Y.Position=4, #"ypos.mm.",
+                                       Width=6, #"width.mm.",
+                                       Length=7, #"length.mm.",
+                                       Size=5, #"size.mm.",
+                                       ID,
+                                       Images.Reflection=Images.R,#"Images.R",
+                                       X
+                                )
+                }else if (ncol(data)>132){
+                        selectData <- data %>%
+                                select(Defect.Class,
+                                       Layer=layer,
+                                       Quality,
+                                       X.Position=3, #"xpos.mm.",
+                                       Y.Position=4, #"ypos.mm.",
+                                       Width=6, #"width.mm.",
+                                       Length=7, #"length.mm.",
+                                       Size=5, #"size.mm.",
+                                       ID,
+                                       Images.Reflection=Images.R,#"Images.R",
+                                       X
+                                )
+                }else if (ncol(data)<=10){
+                        selectData <- data %>%
+                                mutate(Defect.Class=NA, Layer=NA, Quality=NA, X.Position=NA, Y.Position=NA, ID=NA,Images.Reflection=NA,X=NA) %>%
+                                select(Defect.Class,
+                                       Layer,
+                                       Quality,
+                                       X.Position,
+                                       Y.Position,
+                                       Width=3, #"width.mm.",
+                                       Length=2, #"length.mm.",
+                                       Size=4, #"size.mm.",
+                                       ID,
+                                       Images.Reflection,
+                                       X
+                                )
+                }else{
+                        selectData <- data 
+                }
+                
+                return (selectData)
+        }
+        
+        
         #Take the substrate ID from file name and put in a new column with the name "substrateID" 
         file_list$substrateID <- sub("_.*","",file_list$filesName)
         
@@ -80,107 +135,31 @@ getSubstratesDataFromZip <- function(file_list, pirSubstateListPerPallet){
         
         #take the substrates that are in pir file but not in AOI directory
         missingSubstrates <<- pirSubstateListPerPallet[is.na(matchSubstrateID),]
-#         View(missingSubstrates)
         
         data_list <- data_list[!is.na(data_list$substrateID),]
-#         View(data_list)
         
         oldWd <- getwd()
         
         # if there are substrates in data_list read the data from zip files
         if (nrow(data_list)>0){
                 tempWD <- as.character(data_list[1,1])
-                #                 print(tempWD)
                 if (!is.na(tempWD)){
-                        #                         print("tempWD-1")
                         setwd(tempWD)
                         substrateData <- data.frame(read.delim(unz(data_list[1,2],"defects.tsv"), header=T))
-                        #                         print(as.character(data_list[1,2]))
-                        #                         print(ncol(substrateData))
                         
-                      
-                        
-                        if(ncol(substrateData)>11){
-                                substrateData <- substrateData %>%
-                                        mutate(Layer=NA) %>%
-                                        select(Defect.Class,
-                                               Layer,
-                                               Quality,
-                                               X.Position=3, #"xpos.mm.",
-                                               Y.Position=4, #"ypos.mm.",
-                                               Width=6, #"width.mm.",
-                                               Length=7, #"length.mm.",
-                                               Size=5, #"size.mm.",
-                                               ID,
-                                               Images.Reflection=131,#"Images.R",
-                                               X
-                                        )
-                        }
-                        
-                        if(ncol(substrateData)<=10){
-                                substrateData <- substrateData %>%
-                                        mutate(Defect.Class=NA, Layer=NA, Quality=NA, X.Position=NA, Y.Position=NA, ID=NA,Images.Reflection=NA,X=NA) %>%
-                                        select(Defect.Class,
-                                               Layer,
-                                               Quality,
-                                               X.Position,
-                                               Y.Position,
-                                               Width=3, #"width.mm.",
-                                               Length=2, #"length.mm.",
-                                               Size=4, #"size.mm.",
-                                               ID,
-                                               Images.Reflection,
-                                               X
-                                        )
-                        }
+                        substrateData <- selectData(substrateData)
                         
                         substrateData$SUBSTRATE_ID <- as.character(data_list[1,3])
                         glassID <- as.character(data_list[1,3])
                         substrateData$BATCH_ID <- filter(pirSubstateListPerPallet,SUBSTRATE_ID==glassID)[1,3]
                 }
-                #                 print(paste("data_list rows:",nrow(data_list)))
                 for (i in 2:nrow(data_list))
                 {
                         tempWD <- as.character(data_list[i,1])
-                        #                         print("tempWD-2")
-                        #                         print(tempWD)
                         setwd(tempWD)
                         tempData <- read.delim(unz(data_list[i,2],"defects.tsv"), header=T)
-                        #                         print(data_list[i,2])
-                        #                         print(ncol(tempData))
-                        if(ncol(tempData)>11){
-                                tempData <- tempData %>%
-                                        mutate(Layer=NA) %>%
-                                        select(Defect.Class,
-                                               Layer,
-                                               Quality,
-                                               X.Position=3, #"xpos.mm.",
-                                               Y.Position=4, #"ypos.mm.",
-                                               Width=6, #"width.mm.",
-                                               Length=7, #"length.mm.",
-                                               Size=5, #"size.mm.",
-                                               ID,
-                                               Images.Reflection=131,#"Images.R",
-                                               X
-                                        )
-                        }
+                        tempData <- selectData(tempData)
                         
-                        if(ncol(tempData)<=10){
-                                tempData <- tempData %>%
-                                        mutate(Defect.Class=NA, Layer=NA, Quality=NA, X.Position=NA, Y.Position=NA, ID=NA,Images.Reflection=NA,X=NA) %>%
-                                        select(Defect.Class,
-                                               Layer,
-                                               Quality,
-                                               X.Position,
-                                               Y.Position,
-                                               Width=3, #"width.mm.",
-                                               Length=2, #"length.mm.",
-                                               Size=4, #"size.mm.",
-                                               ID,
-                                               Images.Reflection,
-                                               X
-                                        )
-                        }
                         
                         tempData$SUBSTRATE_ID <- as.character(data_list[i,3])
                         glassID <- as.character(data_list[i,3])
@@ -192,7 +171,6 @@ getSubstratesDataFromZip <- function(file_list, pirSubstateListPerPallet){
                 setwd(oldWd)
         }
         
-        #         print(paste("missingSubs rows:",nrow(missingSubstrates)))
         
         if (nrow(missingSubstrates)>0){
                 naData <- data.frame(BATCH_ID=missingSubstrates$GLS_BATCH_NR,
@@ -210,8 +188,6 @@ getSubstratesDataFromZip <- function(file_list, pirSubstateListPerPallet){
                                      Images.Reflection=NA
                 )
         }
-        #                 View(naData)
-        #                 View(substrateData)
         
         substrateData=rbind(substrateData, naData)
         takeSubstrateIDs <- match(substrateData$SUBSTRATE_ID,pirSubstateListPerPallet$SUBSTRATE_ID)
@@ -220,7 +196,6 @@ getSubstratesDataFromZip <- function(file_list, pirSubstateListPerPallet){
         substrateData$AOI_TOOL <- pirSubstateListPerPallet[takeSubstrateIDs,"AOI_TOOL"]
         substrateData$YEAR <- pirSubstateListPerPallet[takeSubstrateIDs,"YEAR"]
         substrateData$MONTH <- pirSubstateListPerPallet[takeSubstrateIDs,"MONTH"]
-        #                 View(substrateData)
         return(substrateData)
 }
 
@@ -342,18 +317,15 @@ deleteDuplicatesFromTable <- function(odbcConnection,tableName, tableColsArray){
         for (c in tableColsArray){
                 if (leftWhereClause==""){
                         leftWhereClause  <- paste("(","L.", c, sep="")
-                        
                 }else{
                         leftWhereClause <- paste(leftWhereClause, " & ", "L.", c, sep="")
                 }
         }
         leftWhereClause <- paste(leftWhereClause,")",sep="")
-        
         rightWhereClause  <- ""
         for (c in tableColsArray){
                 if (rightWhereClause==""){
                         rightWhereClause  <- paste("(", tableName, ".", c, sep="")
-                        
                 }else{
                         rightWhereClause <- paste(rightWhereClause, " & ", tableName , ".", c, sep="")
                 }
@@ -363,12 +335,9 @@ deleteDuplicatesFromTable <- function(odbcConnection,tableName, tableColsArray){
         qry <- paste("DELETE ", tableName, ".* FROM ", tableName, " WHERE ((((SELECT COUNT (*) FROM ",
                      tableName, " AS L  WHERE ", leftWhereClause, " = ", rightWhereClause,
                      " AND (L.RID <= ", tableName,".RID)))>1));",sep="")
-        
-        
-        #         sqlQuery(odbcConnection,qry)
-        
+        sqlQuery(odbcConnection,qry)
         deleteRIDqry <- paste("ALTER TABLE ", tableName, " DROP COLUMN RID;", sep="")
-        #         sqlQuery(odbcConnection,deleteRIDqry)
+        sqlQuery(odbcConnection,deleteRIDqry)
 }
 
 

@@ -13,9 +13,14 @@ setwd("G:/RDEV")
 ##--Dates--------------------------------------------------
 #--Define the dates for the statistics.-------------------#
 #--Date format: mm.dd.yyyy (month.day.year)---------------#
-fromDate <- "03.09.2015"
-toDate  <- "03.15.2015"
-week <- "Week 13"
+fromDate <- "03.20.2015"
+toDate  <- "04.01.2015"
+week <- "Week 13 & 14"
+
+##--Powerpoint file name----------------------------------#
+#---------------------------------------------------------#
+pptxFileName <- "week13_14.pptx"
+pptxFolderName <- "./output/"
 
 #--END OF INPUTS------------------------------------------#
 #---------------------------------------------------------#
@@ -33,9 +38,13 @@ source("./GC_STATS_PIR_FILE_AND_FOLDER.R")
 
 ##-------Calculations--------------------------------------
 #--Read Data from the defined file------------------------#
-pirData  <- read.csv(paste(pirDir,pirFile, sep=""))
+pirData <- NULL
+for (pirF in pirFile){
+        pirTempData  <- read.csv(paste(pirDir,pirF, sep=""), colClasses=c("GLS_BATCH_NR"="character"))
+        pirData <- rbind(pirData,pirTempData)
+}
 
-
+pirData <- distinct(pirData)
 
 #--First Slide--------------------------------------------#
 doc = pptx(template = "G:/Temp/report_example_template.pptx")
@@ -309,4 +318,4 @@ rm(list=c("GCHData","GCH01","GCH02"))
 rm(list=ls(pattern = "gch"))
 
 #--Save File-----------------------------------------------
-writeDoc(doc, "G:/Temp/report_example.pptx" )
+writeDoc(doc, paste(pptxFolderName,pptxFileName,sep=""))

@@ -12,16 +12,16 @@ setwd("G:/RDEV")
 #--Define the dates for the statistics.-------------------# 
 #--Date format: mm.dd.yyyy (month.day.year)---------------#
 from_date <- "03.01.2015"
-to_date  <- "03.19.2015"
+to_date  <- "03.30.2015"
 
 #--Define AOI Tool: Values: 01-AOI-001 OR 01-AOI-002-------
-aoiTool <- "01-AOI-002"
+aoiTool <- "01-AOI-001"
 
 #--Excel File Name-----------------------------------------
 #--if the file already exist it will be replaced.---------#
 #--The excel file will be saved in output folder which is-#
 #--located in the working directory-----------------------#
-excelName  <- "AOI_0021.xlsx"
+excelName  <- "AOI_001.xlsx"
 
 #----END OF INPUTS----------------------------------------#
 #---------------------------------------------------------#
@@ -39,7 +39,14 @@ source("./AOI_STATS_PIR_FILE_AND_FOLDER.R")
 
 ##-------Calculations--------------------------------------
 #--Read Data from the defined file------------------------#
-pirData  <- read.csv(paste(pirDir,pirFile, sep=""))
+pirData <- NULL
+for (pirF in pirFile){
+        pirTempData  <- read.csv(paste(pirDir,pirF, sep=""), colClasses=c("GLS_BATCH_NR"="character"))
+        pirData <- rbind(pirData,pirTempData)
+}
+
+pirData <- distinct(pirData)
+        
 
 #--Extract Data from PIR FILE-----------------------------#
 plotData <- glassesPerDatesPerTool(pirData=pirData, tool = aoiTool, fromDate= from_date, toDate = to_date)
@@ -73,28 +80,21 @@ by_batch_status_sum <- plotData %>%
 
 #--Write Excel Files---------------------------------------
 
-
-write.xlsx2(data.frame(by_batch_status_count), file = paste("./output/",excelName,sep=""),
+write.xlsx(data.frame(by_batch_status_count), file = paste("./output/",excelName,sep=""),
             sheetName = "Summarized Data",row.names = FALSE)
 
-write.xlsx2(plotData, file = paste("./output/",excelName,sep=""), 
+write.xlsx(plotData, file = paste("./output/",excelName,sep=""), 
             sheetName = "Raw Data", append = TRUE)
 
-write.xlsx2(dataforbothtools, file = paste("./output/",excelName,sep=""), 
+write.xlsx(dataforbothtools, file = paste("./output/",excelName,sep=""), 
             sheetName = "Both Tools", append = TRUE)
 
 
 ##--Plot Data----------------------------------------------
-g <- ggplot(data = by_batch_status_count,aes(x =GLS_BATCH_NR,y=COUNT,fill=AOI_RESULT))
-g <- g + geom_bar(stat="identity", position="dodge")
-g <- g + xlab("Batch ID") + ylab("Number of Substrates")
-g <- g + theme(axis.text.x = element_text(angle = 45, hjust = 1, size=12))
-g <- g + theme(axis.title=element_text(size=16,face="bold"))
-g <- g + geom_text(aes(label=COUNT),position = position_dodge(width=1),vjust=1,size=5)
-g
-
-
-
-
-
-
+# g <- ggplot(data = by_batch_status_count,aes(x =GLS_BATCH_NR,y=COUNT,fill=AOI_RESULT))
+# g <- g + geom_bar(stat="identity", position="dodge")
+# g <- g + xlab("Batch ID") + ylab("Number of Substrates")
+# g <- g + theme(axis.text.x = element_text(angle = 45, hjust = 1, size=12))
+# g <- g + theme(axis.title=element_text(size=16,face="bold"))
+# g <- g + geom_text(aes(label=COUNT),position = position_dodge(width=1),vjust=1,size=5)
+# g

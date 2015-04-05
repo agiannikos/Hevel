@@ -3,7 +3,7 @@ library(ggplot2)
 
 
 #-----Set working directory
-setwd("E:/Temp/03_2015")
+setwd("G:/Temp/03_2015")
 #-----Read data
 date_for_plot <- "2015_03_03"
 
